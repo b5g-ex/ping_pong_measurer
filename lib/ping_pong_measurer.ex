@@ -39,5 +39,18 @@ defmodule PingPongMeasurer do
     end
   end
 
-  defdelegate ping(process_index \\ 1, payload \\ ""), to: PingPongMeasurer.Ping, as: :cast_ping
+  @doc """
+  send ping to pong process parallel
+
+  ## Examples
+
+      iex> PingPongMeasurer.connect(100, <<1::size(800)>>) # send ping with 100 byte payload
+
+  """
+  def ping(process_count \\ 1, payload \\ "") do
+    1..process_count
+    |> Flow.from_enumerable()
+    |> Flow.map(fn process_index -> PingPongMeasurer.Ping.cast_ping(process_index, payload) end)
+    |> Enum.to_list()
+  end
 end
