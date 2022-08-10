@@ -1,6 +1,8 @@
 # PingPongMeasurer
 
-**TODO: Add description**
+```
+$ iex --name ping@[ip address] --cookie [cookie] -S mix
+```
 
 ## Installation
 
