@@ -24,3 +24,4 @@ ping_pong_measurer-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+data/
