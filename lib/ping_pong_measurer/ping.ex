@@ -21,6 +21,8 @@ defmodule PingPongMeasurer.Ping do
   end
 
   def init(%State{process_index: index} = state) do
+    Process.flag(:trap_exit, true)
+
     pong_prorcess_name = Module.concat(Elixir.PingPongMeasurer.Pong, "#{index}")
     pong_process_pid = :global.whereis_name(pong_prorcess_name)
 
@@ -31,6 +33,10 @@ defmodule PingPongMeasurer.Ping do
       Logger.error(reason)
       {:stop, reason}
     end
+  end
+
+  def terminate(reason, _state) do
+    Logger.debug("#{reason}")
   end
 
   def cast_ping(process_index \\ 1, payload \\ "") do

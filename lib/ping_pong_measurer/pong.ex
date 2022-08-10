@@ -17,7 +17,13 @@ defmodule PingPongMeasurer.Pong do
   end
 
   def init(state) do
+    Process.flag(:trap_exit, true)
+
     {:ok, state}
+  end
+
+  def terminate(reason, _state) do
+    Logger.debug("#{reason}")
   end
 
   def handle_cast({:ping, ping_process_pid, payload}, state) do
