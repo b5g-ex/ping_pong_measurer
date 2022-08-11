@@ -3,6 +3,9 @@ defmodule PingPongMeasurer do
   Documentation for `PingPongMeasurer`.
   """
 
+  alias PingPongMeasurer.OsInfo.CpuMeasurer
+  alias PingPongMeasurer.OsInfo.MemoryMeasurer
+
   @doc """
   connect Node
 
@@ -60,11 +63,28 @@ defmodule PingPongMeasurer do
     |> Enum.to_list()
   end
 
+  def start_os_info_measurement() do
+    data_directory_path = File.cwd!()
+
+    ds_name = os_info_supervisor_name()
+    PingPongMeasurer.DynamicSupervisor.start_link(ds_name)
+    DynamicSupervisor.start_child(ds_name, {CpuMeasurer, data_directory_path})
+    DynamicSupervisor.start_child(ds_name, {MemoryMeasurer, data_directory_path})
+  end
+
+  def stop_os_info_measurement() do
+    DynamicSupervisor.stop(os_info_supervisor_name())
+  end
+
   defp ping_supervisor_name() do
     Module.concat(__MODULE__, Ping.DynamicSupervisor)
   end
 
   defp pong_supervisor_name() do
     Module.concat(__MODULE__, Pong.DynamicSupervisor)
+  end
+
+  defp os_info_supervisor_name() do
+    Module.concat(__MODULE__, OsInfo.DynamicSupervisor)
   end
 end
