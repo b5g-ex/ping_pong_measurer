@@ -23,8 +23,7 @@ defmodule PingPongMeasurer.MixProject do
     [
       {:flow, "~> 1.0"},
       {:nimble_csv, "~> 1.1"},
-      {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:tzdata, "~> 1.1"}
+      {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false}
     ]
   end
 end
