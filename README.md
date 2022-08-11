@@ -4,17 +4,18 @@
 $ iex --name ping@[ip address] --cookie [cookie] -S mix
 ```
 
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `ping_pong_measurer` to your list of dependencies in `mix.exs`:
+## Getting Started
 
 ```elixir
 def deps do
   [
-    {:ping_pong_measurer, "~> 0.1.0"}
+    {:ping_pong_measurer, git: "https://github.com/b5g-ex/ping_pong_measurer.git"}
   ]
 end
+```
+
+```elixir
+config :ping_pong_measurer, :data_directory_path, "path/to/directory"
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
