@@ -3,21 +3,24 @@ defmodule PingPongMeasurer.OsInfo.CpuMeasurer do
   require Logger
 
   defmodule State do
-    defstruct measurements: [], data_directory_path: nil
+    defstruct measurements: [], data_directory_path: nil, measurement_cycle_ms: 100
   end
 
   defmodule Measurement do
     defstruct measurement_time: nil, value: nil
   end
 
-  def start_link(data_directory_path) when is_binary(data_directory_path) do
-    GenServer.start_link(__MODULE__, data_directory_path, name: __MODULE__)
+  def start_link(init_args) when is_tuple(init_args) do
+    GenServer.start_link(__MODULE__, init_args, name: __MODULE__)
   end
 
-  def init(data_directory_path) when is_binary(data_directory_path) do
+  def init({data_directory_path, measurement_cycle_ms})
+      when is_binary(data_directory_path) and is_integer(measurement_cycle_ms) do
     Process.flag(:trap_exit, true)
     send(self(), :measure)
-    {:ok, %State{data_directory_path: data_directory_path}}
+
+    {:ok,
+     %State{data_directory_path: data_directory_path, measurement_cycle_ms: measurement_cycle_ms}}
   end
 
   def terminate(
@@ -30,9 +33,12 @@ defmodule PingPongMeasurer.OsInfo.CpuMeasurer do
     PingPongMeasurer.Data.save(file_path, [header() | body(measurements)])
   end
 
-  def handle_info(:measure, %State{measurements: measurements} = state) do
+  def handle_info(
+        :measure,
+        %State{measurements: measurements, measurement_cycle_ms: measurement_cycle_ms} = state
+      ) do
     measurement = %Measurement{measurement_time: DateTime.utc_now(), value: measure_cpu()}
-    Process.sleep(1000)
+    Process.sleep(measurement_cycle_ms)
     send(self(), :measure)
     {:noreply, %State{state | measurements: [measurement | measurements]}}
   end
