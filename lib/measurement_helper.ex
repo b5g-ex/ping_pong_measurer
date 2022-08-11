@@ -1,7 +1,7 @@
 defmodule MeasurementHelper do
   alias PingPongMeasurer.Data
 
-  def measurement_impl(process_count \\ 1, payload_bytes \\ 10, measurement_times \\ 10)
+  def start_measurement(process_count \\ 1, payload_bytes \\ 10, measurement_times \\ 10)
       when process_count in [1, 10, 100] and payload_bytes in [10, 100, 1000, 10000] do
     data_directory_path = prepare_data_directory!(process_count, payload_bytes, measurement_times)
 
