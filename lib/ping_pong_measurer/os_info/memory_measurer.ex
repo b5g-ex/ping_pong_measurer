@@ -2,8 +2,6 @@ defmodule PingPongMeasurer.OsInfo.MemoryMeasurer do
   use GenServer
   require Logger
 
-  alias NimbleCSV.RFC4180, as: CSV
-
   defmodule State do
     defstruct measurements: [], data_directory_path: nil
   end
@@ -28,10 +26,8 @@ defmodule PingPongMeasurer.OsInfo.MemoryMeasurer do
       ) do
     Logger.debug("#{inspect(reason)}")
 
-    [header() | body(measurements)]
-    |> CSV.dump_to_stream()
-    |> Enum.join()
-    |> then(&File.write(Path.join(data_directory_path, "memory.csv"), &1))
+    file_path = Path.join(data_directory_path, "memory.csv")
+    PingPongMeasurer.Data.save(file_path, [header() | body(measurements)])
   end
 
   def handle_info(:measure, %State{measurements: measurements} = state) do

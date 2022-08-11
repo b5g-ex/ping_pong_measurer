@@ -9,32 +9,51 @@ defmodule PingPongMeasurer.Ping do
     defstruct process_index: 1, pong_process_pid: nil, data_directory_path: nil, measurements: []
   end
 
-  def start_link(process_index) when is_integer(process_index) do
-    process_name = process_name(process_index)
-    initial_state = %State{process_index: process_index}
+  defmodule Measurement do
+    defstruct measurement_time: nil, send_time: nil, recv_time: nil
 
-    {:ok, pid} = on_start = GenServer.start_link(__MODULE__, initial_state, name: process_name)
+    @type t() :: %__MODULE__{
+            measurement_time: DateTime.t(),
+            send_time: integer(),
+            recv_time: integer()
+          }
+  end
+
+  def start_link({data_directory_path, process_index})
+      when is_binary(data_directory_path) and is_integer(process_index) do
+    process_name = process_name(process_index)
+
+    {:ok, pid} =
+      on_start =
+      GenServer.start_link(__MODULE__, {data_directory_path, process_index}, name: process_name)
+
     :global.register_name(process_name, pid)
 
     on_start
   end
 
-  def init(%State{process_index: index} = state) do
+  def init({data_directory_path, process_index}) do
     Process.flag(:trap_exit, true)
 
-    pong_prorcess_name = Module.concat(Elixir.PingPongMeasurer.Pong, "#{index}")
+    pong_prorcess_name = Module.concat(Elixir.PingPongMeasurer.Pong, "#{process_index}")
     pong_process_pid = :global.whereis_name(pong_prorcess_name)
-    data_directory_path = Application.get_env(:ping_pong_measurer, :data_directory_path)
 
-    with true <- is_pid(pong_process_pid),
-         true <- not is_nil(data_directory_path),
-         true <- File.dir?(data_directory_path) or :ok == File.mkdir_p!(data_directory_path) do
-      {:ok,
-       %State{
-         state
-         | pong_process_pid: pong_process_pid,
+    cond do
+      is_pid(pong_process_pid) == false ->
+        Logger.error("cannot find pong process")
+        {:stop, :normal}
+
+      File.dir?(data_directory_path) == false ->
+        Logger.error("#{data_directory_path} is not directory or doesn't exist")
+        {:stop, :normal}
+
+      true ->
+        {:ok,
+         %State{
+           process_index: process_index,
+           pong_process_pid: pong_process_pid,
            data_directory_path: data_directory_path
-       }}
+         }}
     end
   end
 
@@ -46,10 +65,11 @@ defmodule PingPongMeasurer.Ping do
           process_index: process_index
         } = _state
       ) do
-    Logger.debug("#{reason}")
-    file_name = Data.file_name(DateTime.now!("Asia/Tokyo"), process_index)
+    Logger.debug("#{inspect(reason)}")
+    # ex. if process_index == 100, do: "0100.csv"
+    file_name = "#{String.pad_leading("#{process_index}", 4, "0")}.csv"
     file_path = Path.join(data_directory_path, file_name)
-    Data.save(file_path, measurements)
+    Data.save(file_path, [header() | body(measurements)])
   end
 
   def cast_ping(process_index \\ 1, payload \\ "") do
@@ -68,7 +88,11 @@ defmodule PingPongMeasurer.Ping do
   end
 
   def handle_cast({:pong, _payload}, %State{measurements: [h | t]} = state) do
-    measurement = %Measurement{h | recv_time: System.monotonic_time(:microsecond)}
+    measurement = %Measurement{
+      h
+      | measurement_time: DateTime.utc_now(),
+        recv_time: System.monotonic_time(:microsecond)
+    }
 
     Logger.debug("#{(measurement.recv_time - measurement.send_time) / 1000} ms")
 
@@ -77,5 +101,28 @@ defmodule PingPongMeasurer.Ping do
 
   defp process_name(process_index) when is_integer(process_index) do
     Module.concat(__MODULE__, "#{process_index}")
+  end
+
+  defp header() do
+    [
+      "measurement_time(utc)",
+      "send time[microsecond]",
+      "recv time[microsecond]",
+      "took time[ms]"
+    ]
+  end
+
+  @spec body([Measurement.t()]) :: list()
+  defp body(measurements) when is_list(measurements) do
+    Enum.reduce(measurements, [], fn %Measurement{} = measurement, rows ->
+      row = [
+        measurement.measurement_time,
+        measurement.send_time,
+        measurement.recv_time,
+        (measurement.recv_time - measurement.send_time) / 1000
+      ]
+
+      [row | rows]
+    end)
   end
 end

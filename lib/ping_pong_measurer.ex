@@ -34,13 +34,17 @@ defmodule PingPongMeasurer do
     DynamicSupervisor.stop(pong_supervisor_name())
   end
 
-  def start_ping_processes(process_count \\ 1) do
+  def start_ping_processes(data_directory_path, process_count \\ 1)
+      when is_binary(data_directory_path) do
     ds_name = ping_supervisor_name()
 
     PingPongMeasurer.DynamicSupervisor.start_link(ds_name)
 
     for process_index <- 1..process_count do
-      DynamicSupervisor.start_child(ds_name, {PingPongMeasurer.Ping, process_index})
+      DynamicSupervisor.start_child(
+        ds_name,
+        {PingPongMeasurer.Ping, {data_directory_path, process_index}}
+      )
     end
   end
 
@@ -63,9 +67,7 @@ defmodule PingPongMeasurer do
     |> Enum.to_list()
   end
 
-  def start_os_info_measurement() do
-    data_directory_path = File.cwd!()
-
+  def start_os_info_measurement(data_directory_path) when is_binary(data_directory_path) do
     ds_name = os_info_supervisor_name()
     PingPongMeasurer.DynamicSupervisor.start_link(ds_name)
     DynamicSupervisor.start_child(ds_name, {CpuMeasurer, data_directory_path})
