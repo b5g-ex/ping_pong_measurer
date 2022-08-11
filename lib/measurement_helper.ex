@@ -32,7 +32,6 @@ defmodule MeasurementHelper do
     data_directory_path = Path.join(data_directory_path, directory_name)
 
     File.mkdir_p!(data_directory_path)
-    Process.sleep(100)
     data_directory_path
   end
 end
