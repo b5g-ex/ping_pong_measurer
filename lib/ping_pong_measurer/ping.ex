@@ -94,8 +94,6 @@ defmodule PingPongMeasurer.Ping do
         recv_time: System.monotonic_time(:microsecond)
     }
 
-    Logger.debug("#{(measurement.recv_time - measurement.send_time) / 1000} ms")
-
     {:noreply, %State{state | measurements: [measurement | t]}}
   end
 
