@@ -31,6 +31,10 @@ defmodule PingPongMeasurer.Pong do
     {:noreply, state}
   end
 
+  def handle_call({:ping, _ping_process_pid, payload}, _from, state) do
+    {:reply, {:pong, payload}, state}
+  end
+
   defp process_name(process_index) when is_integer(process_index) do
     Module.concat(__MODULE__, "#{process_index}")
   end

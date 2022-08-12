@@ -63,7 +63,7 @@ defmodule PingPongMeasurer do
   def ping(process_count \\ 1, payload \\ "") do
     1..process_count
     |> Flow.from_enumerable()
-    |> Flow.map(fn process_index -> PingPongMeasurer.Ping.cast_ping(process_index, payload) end)
+    |> Flow.map(fn process_index -> PingPongMeasurer.Ping.call_ping(process_index, payload) end)
     |> Enum.to_list()
   end
 

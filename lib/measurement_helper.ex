@@ -12,7 +12,6 @@ defmodule MeasurementHelper do
 
     for _ <- 1..measurement_times do
       PingPongMeasurer.ping(process_count, <<1::size(payload_bits)>>)
-      Process.sleep(1000)
     end
 
     PingPongMeasurer.stop_ping_processes()

@@ -76,6 +76,10 @@ defmodule PingPongMeasurer.Ping do
     GenServer.cast(process_name(process_index), {:ping, payload})
   end
 
+  def call_ping(process_index \\ 1, payload \\ "") do
+    GenServer.call(process_name(process_index), {:ping, payload})
+  end
+
   def handle_cast(
         {:ping, payload},
         %State{pong_process_pid: pong_process_pid, measurements: measurements} = state
@@ -95,6 +99,20 @@ defmodule PingPongMeasurer.Ping do
     }
 
     {:noreply, %State{state | measurements: [measurement | t]}}
+  end
+
+  def handle_call(
+        {:ping, payload},
+        _from,
+        %State{pong_process_pid: pong_process_pid, measurements: measurements} = state
+      ) do
+    measurement = %Measurement{send_time: System.monotonic_time(:microsecond)}
+
+    {:pong, ^payload} = GenServer.call(pong_process_pid, {:ping, self(), payload})
+
+    measurement = %Measurement{measurement | recv_time: System.monotonic_time(:microsecond)}
+
+    {:reply, :ok, %State{state | measurements: [measurement | measurements]}}
   end
 
   defp process_name(process_index) when is_integer(process_index) do
