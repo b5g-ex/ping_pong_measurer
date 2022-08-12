@@ -23,21 +23,16 @@ If you use this on Nerves system, the "path/to/directory" must be under the `/da
 3. start pong node first
 
 ```elixir
-$ iex -S mix
-$ System.cmd("epmd", ["-daemon"])
-$ Node.start(:"pong@#{pong_node_ip_address}")
-$ Node.set_cookie(cookie)
+iex> MeasurementHelper.start_node("pong@192.168.1.2", :cookie)
+iex> PingPongMeasurer.start_pong_processes(_process_count = 100)
 ```
 
 4. start ping node and start measure
 
 ```elixir
-$ iex -S mix
-$ System.cmd("epmd", ["-daemon"])
-$ Node.start(:"ping@#{ping_node_ip_address}")
-$ Node.set_cookie(cookie)
-$ Node.connect(:"pong@#{pong_node_ip_address}")
-$ MeasurementHelper.start_measurement()
+iex> MeasurementHelper.start_node("ping@192.168.1.3", :cookie)
+$ Node.connect(String.to_atom("pong@192.168.1.2"))
+$ MeasurementHelper.start_measurement(_process_count =100)
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)

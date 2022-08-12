@@ -18,6 +18,12 @@ defmodule MeasurementHelper do
     PingPongMeasurer.stop_os_info_measurement()
   end
 
+  def start_node(longname, cookie) when is_binary(longname) and is_atom(cookie) do
+    System.cmd("epmd", ["-daemon"])
+    longname |> String.to_atom() |> Node.start()
+    Node.set_cookie(cookie)
+  end
+
   defp prepare_data_directory!(process_count, payload_bytes, measurement_times) do
     data_directory_path =
       Application.get_env(:ping_pong_measurer, :data_directory_path) ||
