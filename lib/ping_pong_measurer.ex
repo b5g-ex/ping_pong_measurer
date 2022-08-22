@@ -68,7 +68,7 @@ defmodule PingPongMeasurer do
     process_index_range = 0..(process_count - 1)
 
     process_index_range
-    |> Flow.from_enumerable()
+    |> Flow.from_enumerable(max_demand: 1, stages: process_count)
     |> Flow.map(fn process_index -> PingPongMeasurer.Ping.call_ping(process_index, payload) end)
     |> Enum.to_list()
   end
