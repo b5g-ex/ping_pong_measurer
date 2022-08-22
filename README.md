@@ -38,7 +38,7 @@ iex> PingPongMeasurer.start_pong_processes(_process_count = 100)
 ```elixir
 iex> MeasurementHelper.start_node("ping@192.168.1.3", :cookie)
 $ Node.connect(String.to_atom("pong@192.168.1.2"))
-$ MeasurementHelper.start_measurement(_process_count =100)
+$ MeasurementHelper.start_measurement(_process_count = 100, _payload_bytes = 10000, _measurement_times = 100)
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
