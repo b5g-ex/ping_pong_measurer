@@ -84,7 +84,10 @@ defmodule PingPongMeasurer.Ping do
         {:ping, payload},
         %State{pong_process_pid: pong_process_pid, measurements: measurements} = state
       ) do
-    measurement = %Measurement{send_time: System.monotonic_time(:microsecond)}
+    measurement = %Measurement{
+      measurement_time: DateTime.utc_now(),
+      send_time: System.monotonic_time(:microsecond)
+    }
 
     :ok = GenServer.cast(pong_process_pid, {:ping, self(), payload})
 
@@ -92,11 +95,7 @@ defmodule PingPongMeasurer.Ping do
   end
 
   def handle_cast({:pong, _payload}, %State{measurements: [h | t]} = state) do
-    measurement = %Measurement{
-      h
-      | measurement_time: DateTime.utc_now(),
-        recv_time: System.monotonic_time(:microsecond)
-    }
+    measurement = %Measurement{h | recv_time: System.monotonic_time(:microsecond)}
 
     {:noreply, %State{state | measurements: [measurement | t]}}
   end
@@ -106,7 +105,10 @@ defmodule PingPongMeasurer.Ping do
         _from,
         %State{pong_process_pid: pong_process_pid, measurements: measurements} = state
       ) do
-    measurement = %Measurement{send_time: System.monotonic_time(:microsecond)}
+    measurement = %Measurement{
+      measurement_time: DateTime.utc_now(),
+      send_time: System.monotonic_time(:microsecond)
+    }
 
     {:pong, ^payload} = GenServer.call(pong_process_pid, {:ping, self(), payload})
 
