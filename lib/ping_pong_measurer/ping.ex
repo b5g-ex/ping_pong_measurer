@@ -105,7 +105,11 @@ defmodule PingPongMeasurer.Ping do
   def handle_call(
         {:ping, payload},
         _from,
-        %State{pong_process_pid: pong_process_pid, measurements: measurements} = state
+        %State{
+          process_index: process_index,
+          pong_process_pid: pong_process_pid,
+          measurements: measurements
+        } = state
       ) do
     measurement = %Measurement{
       measurement_time: DateTime.utc_now(),
@@ -117,8 +121,15 @@ defmodule PingPongMeasurer.Ping do
     end
 
     measurement = %Measurement{measurement | recv_time: System.monotonic_time(:microsecond)}
+    measurements = [measurement | measurements]
 
-    {:reply, :ok, %State{state | measurements: [measurement | measurements]}}
+    if process_index == 0 do
+      Logger.debug(
+        "measurements #{inspect(Enum.count(measurements))}: took time[ms] #{took_time_ms(measurement)}"
+      )
+    end
+
+    {:reply, :ok, %State{state | measurements: measurements}}
   end
 
   defp process_name(process_index) when is_integer(process_index) do
@@ -141,10 +152,14 @@ defmodule PingPongMeasurer.Ping do
         measurement.measurement_time,
         measurement.send_time,
         measurement.recv_time,
-        (measurement.recv_time - measurement.send_time) / 1000
+        took_time_ms(measurement)
       ]
 
       [row | rows]
     end)
+  end
+
+  defp took_time_ms(%Measurement{} = measurement) do
+    (measurement.recv_time - measurement.send_time) / 1000
   end
 end
