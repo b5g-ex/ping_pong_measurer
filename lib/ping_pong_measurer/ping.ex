@@ -5,6 +5,8 @@ defmodule PingPongMeasurer.Ping do
   alias PingPongMeasurer.Data
   alias PingPongMeasurer.Data.Measurement
 
+  @ping_times 100
+
   defmodule State do
     defstruct process_index: 0, pong_process_pid: nil, data_directory_path: nil, measurements: []
   end
@@ -110,7 +112,9 @@ defmodule PingPongMeasurer.Ping do
       send_time: System.monotonic_time(:microsecond)
     }
 
-    {:pong, ^payload} = GenServer.call(pong_process_pid, {:ping, self(), payload})
+    for _ <- 1..@ping_times do
+      {:pong, ^payload} = GenServer.call(pong_process_pid, {:ping, self(), payload})
+    end
 
     measurement = %Measurement{measurement | recv_time: System.monotonic_time(:microsecond)}
 
