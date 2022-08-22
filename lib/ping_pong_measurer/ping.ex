@@ -60,14 +60,14 @@ defmodule PingPongMeasurer.Ping do
   end
 
   def terminate(
-        reason,
+        _reason,
         %State{
           measurements: measurements,
           data_directory_path: data_directory_path,
           process_index: process_index
         } = _state
       ) do
-    Logger.debug("#{inspect(reason)}")
+    # Logger.debug("#{inspect(reason)}")
     # ex. if process_index == 99, do: "0099.csv"
     file_name = "#{String.pad_leading("#{process_index}", 4, "0")}.csv"
     file_path = Path.join(data_directory_path, file_name)
