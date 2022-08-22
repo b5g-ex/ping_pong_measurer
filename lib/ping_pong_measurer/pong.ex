@@ -23,7 +23,7 @@ defmodule PingPongMeasurer.Pong do
   end
 
   def terminate(reason, _state) do
-    Logger.debug("#{reason}")
+    Logger.debug("#{inspect(reason)}")
   end
 
   def handle_cast({:ping, ping_process_pid, payload}, state) do
