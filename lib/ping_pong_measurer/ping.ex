@@ -6,7 +6,7 @@ defmodule PingPongMeasurer.Ping do
   alias PingPongMeasurer.Data.Measurement
 
   defmodule State do
-    defstruct process_index: 1, pong_process_pid: nil, data_directory_path: nil, measurements: []
+    defstruct process_index: 0, pong_process_pid: nil, data_directory_path: nil, measurements: []
   end
 
   defmodule Measurement do
@@ -66,17 +66,17 @@ defmodule PingPongMeasurer.Ping do
         } = _state
       ) do
     Logger.debug("#{inspect(reason)}")
-    # ex. if process_index == 100, do: "0100.csv"
+    # ex. if process_index == 99, do: "0099.csv"
     file_name = "#{String.pad_leading("#{process_index}", 4, "0")}.csv"
     file_path = Path.join(data_directory_path, file_name)
     Data.save(file_path, [header() | body(measurements)])
   end
 
-  def cast_ping(process_index \\ 1, payload \\ "") do
+  def cast_ping(process_index \\ 0, payload \\ "") do
     GenServer.cast(process_name(process_index), {:ping, payload})
   end
 
-  def call_ping(process_index \\ 1, payload \\ "") do
+  def call_ping(process_index \\ 0, payload \\ "") do
     GenServer.call(process_name(process_index), {:ping, payload})
   end
 

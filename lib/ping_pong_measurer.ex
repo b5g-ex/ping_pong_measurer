@@ -25,7 +25,9 @@ defmodule PingPongMeasurer do
 
     PingPongMeasurer.DynamicSupervisor.start_link(ds_name)
 
-    for process_index <- 1..process_count do
+    process_index_range = 0..(process_count - 1)
+
+    for process_index <- process_index_range do
       DynamicSupervisor.start_child(ds_name, {PingPongMeasurer.Pong, process_index})
     end
   end
@@ -40,7 +42,9 @@ defmodule PingPongMeasurer do
 
     PingPongMeasurer.DynamicSupervisor.start_link(ds_name)
 
-    for process_index <- 1..process_count do
+    process_index_range = 0..(process_count - 1)
+
+    for process_index <- process_index_range do
       DynamicSupervisor.start_child(
         ds_name,
         {PingPongMeasurer.Ping, {data_directory_path, process_index}}
@@ -61,7 +65,9 @@ defmodule PingPongMeasurer do
 
   """
   def ping(process_count \\ 1, payload \\ "") do
-    1..process_count
+    process_index_range = 0..(process_count - 1)
+
+    process_index_range
     |> Flow.from_enumerable()
     |> Flow.map(fn process_index -> PingPongMeasurer.Ping.call_ping(process_index, payload) end)
     |> Enum.to_list()

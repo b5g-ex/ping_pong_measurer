@@ -3,7 +3,7 @@ defmodule PingPongMeasurer.Pong do
   require Logger
 
   defmodule State do
-    defstruct process_index: 1, ping_pid: nil
+    defstruct process_index: 0, ping_pid: nil
   end
 
   def start_link(process_index) when is_integer(process_index) do
