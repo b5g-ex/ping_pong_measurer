@@ -36,7 +36,11 @@ defmodule PingPongMeasurer.PingTest do
       assert catch_exit(Ping.call_ping(nonexistent_process_index)) ==
                {:noproc,
                 {GenServer, :call,
-                 [:"Elixir.PingPongMeasurer.Ping.#{nonexistent_process_index}", {:ping, ""}, 5000]}}
+                 [
+                   :"Elixir.PingPongMeasurer.Ping.#{nonexistent_process_index}",
+                   {:ping, ""},
+                   15000
+                 ]}}
     end
 
     @tag :capture_log

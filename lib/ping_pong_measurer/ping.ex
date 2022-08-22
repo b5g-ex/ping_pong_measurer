@@ -6,6 +6,7 @@ defmodule PingPongMeasurer.Ping do
   alias PingPongMeasurer.Data.Measurement
 
   @ping_times 100
+  @gen_server_call_time_out 15_000
 
   defmodule State do
     defstruct process_index: 0, pong_process_pid: nil, data_directory_path: nil, measurements: []
@@ -79,7 +80,7 @@ defmodule PingPongMeasurer.Ping do
   end
 
   def call_ping(process_index \\ 0, payload \\ "") do
-    GenServer.call(process_name(process_index), {:ping, payload})
+    GenServer.call(process_name(process_index), {:ping, payload}, @gen_server_call_time_out)
   end
 
   def handle_cast(
@@ -117,7 +118,8 @@ defmodule PingPongMeasurer.Ping do
     }
 
     for _ <- 1..@ping_times do
-      {:pong, ^payload} = GenServer.call(pong_process_pid, {:ping, self(), payload})
+      {:pong, ^payload} =
+        GenServer.call(pong_process_pid, {:ping, self(), payload}, @gen_server_call_time_out)
     end
 
     measurement = %Measurement{measurement | recv_time: System.monotonic_time(:microsecond)}
