@@ -61,7 +61,7 @@ defmodule PingPongMeasurer do
 
   ## Examples
 
-      iex> PingPongMeasurer.connect(100, <<1::size(800)>>) # send ping with 100 byte payload
+      iex> PingPongMeasurer.ping(100, <<1::size(800)>>) # send ping with 100 byte payload
 
   """
   def ping(process_count \\ 1, payload \\ "") do
