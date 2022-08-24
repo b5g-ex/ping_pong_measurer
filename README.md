@@ -1,11 +1,5 @@
 # PingPongMeasurer
 
-## TODO
-
-- [x] pingの往復回数実装
-- [x] 計測データファイル名を 0 始まりに修正
-
-
 ## Getting Started
 
 1. add this to deps
