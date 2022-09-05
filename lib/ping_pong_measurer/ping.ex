@@ -6,7 +6,7 @@ defmodule PingPongMeasurer.Ping do
   alias PingPongMeasurer.Data.Measurement
 
   @ping_times 100
-  @gen_server_call_time_out 15_000
+  @gen_server_call_time_out 60_000
 
   defmodule State do
     defstruct process_index: 0, pong_process_pid: nil, data_directory_path: nil, measurements: []
